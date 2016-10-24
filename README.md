@@ -8,4 +8,4 @@ Get away spider! Run on Visual Studio with Kinect SDK.
 ## Start the game
  - Buka Visual Studio
  - File > Open > Project/Solution
- - Pilih `ShapeGame.sln`
+ - Pilih `ShapeGame/ShapeGame.sln`
