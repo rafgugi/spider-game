@@ -20,7 +20,7 @@
                 <kt:KinectColorViewer Margin="0,18,19,0" HorizontalAlignment="Right" Width="160" Height="120" VerticalAlignment="Top" KinectSensorManager="{Binding}"/>
                 <toolkit:KinectSensorChooserUI x:Name="SensorChooserUI" IsListening="True"  HorizontalAlignment="Center" VerticalAlignment="Top" />
             </Grid>
-            <CheckBox x:Name="enableAec" Foreground="White" FontSize="20" Margin="19,0,0,18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Visibility="Collapsed" Checked="EnableAecChecked" Unchecked="EnableAecChecked" IsEnabled="False">
+            <CheckBox x:Name="enableAec" Foreground="White" FontSize="20" Margin="19,0,0,18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Visibility="Collapsed" IsEnabled="False">
                 Enable Echo Cancellation on Default Speakers
             </CheckBox>
         </StackPanel>
