@@ -236,6 +236,7 @@ namespace ShapeGame
                                     else
                                     {
                                         // Bounce off line segment
+                                        Console.WriteLine("Menyentuh Line");
                                         double velocityX = (pair.Value.XVelocity * (1.0 - lineHitLocation)) + (pair.Value.XVelocity2 * lineHitLocation);
                                         double velocityY = (pair.Value.YVelocity * (1.0 - lineHitLocation)) + (pair.Value.YVelocity2 * lineHitLocation);
 
@@ -674,7 +675,16 @@ namespace ShapeGame
                     if (sqrLineSize < 0.5)
                     {
                         // if less than 1/2 pixel apart, just check dx to an endpoint
-                        return SquaredDistance(this.Center.X, this.Center.Y, seg.X1, seg.Y1) < minDxSquared;
+                        //return SquaredDistance(this.Center.X, this.Center.Y, seg.X1, seg.Y1) < minDxSquared;
+                        if (SquaredDistance(this.Center.X, this.Center.Y, seg.X1, seg.Y1) <= minDxSquared)
+                        {
+                            hitCenter.X = seg.X1;
+                            hitCenter.Y = seg.Y1;
+                            lineHitLocation = 0;
+                            return true;
+                        }
+                        else
+                            return false;
                     }
 
                     // Find dx from center to line
