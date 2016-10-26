@@ -695,12 +695,6 @@ namespace ShapeGame
 
                     children.Add(
                         this.MakeSimpleShape(
-                            this.polyDefs[this.Shape].Sides,
-                            this.polyDefs[this.Shape].Skip,
-                            this.Size,
-                            this.Theta,
-                            this.Center,
-                            this.Brush,
                             this.BrushPulse,
                             this.Size * 0.1,
                             alpha));
@@ -714,12 +708,6 @@ namespace ShapeGame
 
                     children.Add(
                         this.MakeSimpleShape(
-                            this.polyDefs[this.Shape].Sides,
-                            this.polyDefs[this.Shape].Skip,
-                            this.Size,
-                            this.Theta,
-                            this.Center,
-                            this.Brush,
                             (this.State == ThingState.Dissolving) ? null : this.Brush2,
                             1,
                             1));
@@ -727,16 +715,17 @@ namespace ShapeGame
             }
 
             private Shape MakeSimpleShape(
-                int numSides,
-                int skip,
-                double size,
-                double spin,
-                System.Windows.Point center,
-                System.Windows.Media.Brush brush,
                 System.Windows.Media.Brush brushStroke,
                 double strokeThickness,
                 double opacity)
             {
+                int numSides = Thing.polyDefs[this.Shape].Sides;
+                int skip = Thing.polyDefs[this.Shape].Skip;
+                double size = this.Size;
+                double spin = this.Theta;
+                System.Windows.Point center = this.Center;
+                System.Windows.Media.Brush brush = this.Brush;
+
                 if (numSides <= 1)
                 {
                     var circle = new Ellipse { Width = size * 2, Height = size * 2, Stroke = brushStroke };
