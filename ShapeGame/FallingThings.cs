@@ -27,18 +27,6 @@ namespace ShapeGame
         private const double BaseGravity = 0.017;
         private const double BaseAirFriction = 0.994;
 
-        private readonly Dictionary<PolyType, PolyDef> polyDefs = new Dictionary<PolyType, PolyDef>
-            {
-                { PolyType.Triangle, new PolyDef { Sides = 3, Skip = 1 } },
-                { PolyType.Star, new PolyDef { Sides = 5, Skip = 2 } },
-                { PolyType.Pentagon, new PolyDef { Sides = 5, Skip = 1 } },
-                { PolyType.Square, new PolyDef { Sides = 4, Skip = 1 } },
-                { PolyType.Hex, new PolyDef { Sides = 6, Skip = 1 } },
-                { PolyType.Star7, new PolyDef { Sides = 7, Skip = 3 } },
-                { PolyType.Circle, new PolyDef { Sides = 1, Skip = 1 } },
-                { PolyType.Bubble, new PolyDef { Sides = 0, Skip = 1 } }
-            };
-
         private readonly List<Thing> things = new List<Thing>();
         private readonly Random rnd = new Random();
         private readonly int maxThings;
@@ -71,14 +59,6 @@ namespace ShapeGame
             this.sceneRect.Width = this.sceneRect.Height = 100;
             this.shapeSize = this.sceneRect.Height * this.baseShapeSize / 1000.0;
             this.expandingRate = Math.Exp(Math.Log(6.0) / (this.targetFrameRate * DissolveTime));
-        }
-
-        public enum ThingState
-        {
-            Falling = 0,
-            Bouncing = 1,
-            Dissolving = 2,
-            Remove = 3
         }
 
         public static Label MakeSimpleLabel(string text, Rect bounds, System.Windows.Media.Brush brush)
@@ -432,56 +412,7 @@ namespace ShapeGame
             for (int i = 0; i < this.things.Count; i++)
             {
                 Thing thing = this.things[i];
-                if (thing.Brush == null)
-                {
-                    thing.Brush = new SolidColorBrush(thing.Color);
-                    double factor = 0.4 + (((double)thing.Color.R + thing.Color.G + thing.Color.B) / 1600);
-                    thing.Brush2 =
-                        new SolidColorBrush(
-                            System.Windows.Media.Color.FromRgb(
-                                (byte)(255 - ((255 - thing.Color.R) * factor)),
-                                (byte)(255 - ((255 - thing.Color.G) * factor)),
-                                (byte)(255 - ((255 - thing.Color.B) * factor))));
-                    thing.BrushPulse = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 255, 255));
-                }
-
-                if (thing.State == ThingState.Bouncing)
-                {
-                    // Pulsate edges
-                    double alpha = Math.Cos((0.15 * (thing.FlashCount++) * thing.Hotness) * 0.5) + 0.5;
-
-                    children.Add(
-                        this.MakeSimpleShape(
-                            this.polyDefs[thing.Shape].Sides,
-                            this.polyDefs[thing.Shape].Skip,
-                            thing.Size,
-                            thing.Theta,
-                            thing.Center,
-                            thing.Brush,
-                            thing.BrushPulse,
-                            thing.Size * 0.1,
-                            alpha));
-                    this.things[i] = thing;
-                }
-                else
-                {
-                    if (thing.State == ThingState.Dissolving)
-                    {
-                        thing.Brush.Opacity = 1.0 - (thing.Dissolve * thing.Dissolve);
-                    }
-
-                    children.Add(
-                        this.MakeSimpleShape(
-                            this.polyDefs[thing.Shape].Sides,
-                            this.polyDefs[thing.Shape].Skip,
-                            thing.Size,
-                            thing.Theta,
-                            thing.Center,
-                            thing.Brush,
-                            (thing.State == ThingState.Dissolving) ? null : thing.Brush2,
-                            1,
-                            1));
-                }
+                thing.Draw(children);
             }
 
             // Show scores
@@ -650,6 +581,18 @@ namespace ShapeGame
             public int Hotness;                 // Score level
             public int FlashCount;
 
+            private readonly Dictionary<PolyType, PolyDef> polyDefs = new Dictionary<PolyType, PolyDef>
+                {
+                    { PolyType.Triangle, new PolyDef { Sides = 3, Skip = 1 } },
+                    { PolyType.Star, new PolyDef { Sides = 5, Skip = 2 } },
+                    { PolyType.Pentagon, new PolyDef { Sides = 5, Skip = 1 } },
+                    { PolyType.Square, new PolyDef { Sides = 4, Skip = 1 } },
+                    { PolyType.Hex, new PolyDef { Sides = 6, Skip = 1 } },
+                    { PolyType.Star7, new PolyDef { Sides = 7, Skip = 3 } },
+                    { PolyType.Circle, new PolyDef { Sides = 1, Skip = 1 } },
+                    { PolyType.Bubble, new PolyDef { Sides = 0, Skip = 1 } }
+                };
+
             // Hit testing between this thing and a single segment.  If hit, the center point on
             // the segment being hit is returned, along with the spot on the line from 0 to 1 if
             // a line segment was hit.
@@ -688,7 +631,7 @@ namespace ShapeGame
                     }
 
                     // Find dx from center to line
-                    double u = ((this.Center.X - seg.X1) * (seg.X2 - seg.X1)) + (((this.Center.Y - seg.Y1) * (seg.Y2 - seg.Y1)) / sqrLineSize);
+                    double u = ((this.Center.X - seg.X1) * (seg.X2 - seg.X1) + (this.Center.Y - seg.Y1) * (seg.Y2 - seg.Y1)) / sqrLineSize;
                     if ((u >= 0) && (u <= 1.0))
                     {   // Tangent within line endpoints, see if we're close enough
                         double intersectX = seg.X1 + ((seg.X2 - seg.X1) * u);
@@ -774,6 +717,69 @@ namespace ShapeGame
                 this.Center.X = x0;
                 this.Center.Y = y0;
             }
+
+            public void Draw(UIElementCollection children)
+            {
+
+                if (this.Brush == null)
+                {
+                    this.Brush = new SolidColorBrush(this.Color);
+                    double factor = 0.4 + (((double)this.Color.R + this.Color.G + this.Color.B) / 1600);
+                    this.Brush2 =
+                        new SolidColorBrush(
+                            System.Windows.Media.Color.FromRgb(
+                                (byte)(255 - ((255 - this.Color.R) * factor)),
+                                (byte)(255 - ((255 - this.Color.G) * factor)),
+                                (byte)(255 - ((255 - this.Color.B) * factor))));
+                    this.BrushPulse = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 255, 255));
+                }
+
+                if (this.State == ThingState.Bouncing)
+                {
+                    // Pulsate edges
+                    double alpha = Math.Cos((0.15 * (this.FlashCount++) * this.Hotness) * 0.5) + 0.5;
+
+                    children.Add(
+                        this.MakeSimpleShape(
+                            this.polyDefs[this.Shape].Sides,
+                            this.polyDefs[this.Shape].Skip,
+                            this.Size,
+                            this.Theta,
+                            this.Center,
+                            this.Brush,
+                            this.BrushPulse,
+                            this.Size * 0.1,
+                            alpha));
+                }
+                else
+                {
+                    if (this.State == ThingState.Dissolving)
+                    {
+                        this.Brush.Opacity = 1.0 - (this.Dissolve * this.Dissolve);
+                    }
+
+                    children.Add(
+                        this.MakeSimpleShape(
+                            this.polyDefs[this.Shape].Sides,
+                            this.polyDefs[this.Shape].Skip,
+                            this.Size,
+                            this.Theta,
+                            this.Center,
+                            this.Brush,
+                            (this.State == ThingState.Dissolving) ? null : this.Brush2,
+                            1,
+                            1));
+                }
+            }
         }
+
+        public enum ThingState
+        {
+            Falling = 0,
+            Bouncing = 1,
+            Dissolving = 2,
+            Remove = 3
+        }
+        
     }
 }
