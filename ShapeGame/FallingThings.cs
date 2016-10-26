@@ -506,52 +506,6 @@ namespace ShapeGame
             this.things.Add(newThing);
         }
 
-        private Shape MakeSimpleShape(
-            int numSides,
-            int skip,
-            double size,
-            double spin,
-            System.Windows.Point center,
-            System.Windows.Media.Brush brush,
-            System.Windows.Media.Brush brushStroke,
-            double strokeThickness,
-            double opacity)
-        {
-            if (numSides <= 1)
-            {
-                var circle = new Ellipse { Width = size * 2, Height = size * 2, Stroke = brushStroke };
-                if (circle.Stroke != null)
-                {
-                    circle.Stroke.Opacity = opacity;
-                }
-
-                circle.StrokeThickness = strokeThickness * ((numSides == 1) ? 1 : 2);
-                circle.Fill = (numSides == 1) ? brush : null;
-                circle.SetValue(Canvas.LeftProperty, center.X - size);
-                circle.SetValue(Canvas.TopProperty, center.Y - size);
-                return circle;
-            }
-
-            var points = new PointCollection(numSides + 2);
-            double theta = spin;
-            for (int i = 0; i <= numSides + 1; ++i)
-            {
-                points.Add(new System.Windows.Point((Math.Cos(theta) * size) + center.X, (Math.Sin(theta) * size) + center.Y));
-                theta = theta + (2.0 * Math.PI * skip / numSides);
-            }
-
-            var polyline = new Polyline { Points = points, Stroke = brushStroke };
-            if (polyline.Stroke != null)
-            {
-                polyline.Stroke.Opacity = opacity;
-            }
-
-            polyline.Fill = brush;
-            polyline.FillRule = FillRule.Nonzero;
-            polyline.StrokeThickness = strokeThickness;
-            return polyline;
-        }
-
         internal struct PolyDef
         {
             public int Sides;
@@ -564,8 +518,8 @@ namespace ShapeGame
         {
             public System.Windows.Point Center;
             public double Size;
-            public double Theta;
-            public double SpinRate;
+            public double Theta;             // sekarang lagi dirotasi sejauh brp
+            public double SpinRate;          // perubahan theta per frame
             public double YVelocity;
             public double XVelocity;
             public PolyType Shape;
@@ -581,7 +535,7 @@ namespace ShapeGame
             public int Hotness;                 // Score level
             public int FlashCount;
 
-            private readonly Dictionary<PolyType, PolyDef> polyDefs = new Dictionary<PolyType, PolyDef>
+            private static readonly Dictionary<PolyType, PolyDef> polyDefs = new Dictionary<PolyType, PolyDef>
                 {
                     { PolyType.Triangle, new PolyDef { Sides = 3, Skip = 1 } },
                     { PolyType.Star, new PolyDef { Sides = 5, Skip = 2 } },
@@ -770,6 +724,52 @@ namespace ShapeGame
                             1,
                             1));
                 }
+            }
+
+            private Shape MakeSimpleShape(
+                int numSides,
+                int skip,
+                double size,
+                double spin,
+                System.Windows.Point center,
+                System.Windows.Media.Brush brush,
+                System.Windows.Media.Brush brushStroke,
+                double strokeThickness,
+                double opacity)
+            {
+                if (numSides <= 1)
+                {
+                    var circle = new Ellipse { Width = size * 2, Height = size * 2, Stroke = brushStroke };
+                    if (circle.Stroke != null)
+                    {
+                        circle.Stroke.Opacity = opacity;
+                    }
+
+                    circle.StrokeThickness = strokeThickness * ((numSides == 1) ? 1 : 2);
+                    circle.Fill = (numSides == 1) ? brush : null;
+                    circle.SetValue(Canvas.LeftProperty, center.X - size);
+                    circle.SetValue(Canvas.TopProperty, center.Y - size);
+                    return circle;
+                }
+
+                var points = new PointCollection(numSides + 2);
+                double theta = spin;
+                for (int i = 0; i <= numSides + 1; ++i)
+                {
+                    points.Add(new System.Windows.Point((Math.Cos(theta) * size) + center.X, (Math.Sin(theta) * size) + center.Y));
+                    theta = theta + (2.0 * Math.PI * skip / numSides);
+                }
+
+                var polyline = new Polyline { Points = points, Stroke = brushStroke };
+                if (polyline.Stroke != null)
+                {
+                    polyline.Stroke.Opacity = opacity;
+                }
+
+                polyline.Fill = brush;
+                polyline.FillRule = FillRule.Nonzero;
+                polyline.StrokeThickness = strokeThickness;
+                return polyline;
             }
         }
 
