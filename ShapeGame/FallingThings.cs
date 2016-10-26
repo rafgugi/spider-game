@@ -27,7 +27,7 @@ namespace ShapeGame
         private const double BaseGravity = 0.017;
         private const double BaseAirFriction = 0.994;
 
-        private readonly List<Thing> things = new List<Thing>();
+        private readonly List<Spider> things = new List<Spider>();
         private readonly Random rnd = new Random();
         private readonly int maxThings;
         private readonly int intraFrames = 1;
@@ -118,7 +118,7 @@ namespace ShapeGame
         {
             for (int i = 0; i < this.things.Count; i++)
             {
-                Thing thing = this.things[i];
+                var thing = this.things[i];
                 if ((thing.State == ThingState.Bouncing) || (thing.State == ThingState.Falling))
                 {
                     thing.State = ThingState.Dissolving;
@@ -149,7 +149,7 @@ namespace ShapeGame
                 // Stop all movement as well!
                 for (int i = 0; i < this.things.Count; i++)
                 {
-                    Thing thing = this.things[i];
+                    var thing = this.things[i];
                     thing.XVelocity = thing.YVelocity = 0;
                     this.things[i] = thing;
                 }
@@ -177,7 +177,7 @@ namespace ShapeGame
                 for (int i = 0; i < this.things.Count; i++)
                 {
                     HitType hit = HitType.None;
-                    Thing thing = this.things[i];
+                    var thing = this.things[i];
                     switch (thing.State)
                     {
                         case ThingState.Bouncing:
@@ -323,7 +323,7 @@ namespace ShapeGame
             // Move all things by one step, accounting for gravity
             for (int thingIndex = 0; thingIndex < this.things.Count; thingIndex++)
             {
-                Thing thing = this.things[thingIndex];
+                var thing = this.things[thingIndex];
                 thing.Center.Offset(thing.XVelocity, thing.YVelocity);
                 thing.YVelocity += this.gravity * this.sceneRect.Height;
                 thing.YVelocity *= this.airFriction;
@@ -360,7 +360,7 @@ namespace ShapeGame
             // Then remove any that should go away now
             for (int i = 0; i < this.things.Count; i++)
             {
-                Thing thing = this.things[i];
+                var thing = this.things[i];
                 if (thing.State == ThingState.Remove)
                 {
                     this.things.Remove(thing);
@@ -411,7 +411,7 @@ namespace ShapeGame
             // Draw all shapes in the scene
             for (int i = 0; i < this.things.Count; i++)
             {
-                Thing thing = this.things[i];
+                var thing = this.things[i];
                 thing.Draw(children);
             }
 
@@ -930,9 +930,7 @@ namespace ShapeGame
                 {
                     this.Brush.Opacity = 1.0 - (this.Dissolve * this.Dissolve);
                 }
-
-                int numSides = Thing.polyDefs[this.Shape].Sides;
-                int skip = Thing.polyDefs[this.Shape].Skip;
+                
                 double size = this.Size;
                 double spin = this.Theta;
                 System.Windows.Point center = this.Center;
@@ -956,7 +954,7 @@ namespace ShapeGame
 
                 children.Add(circle);
 
-
+                // create spiders head
                 Shape head = new Ellipse { Width = size, Height = size, Stroke = brushStroke };
 
                 if (head.Stroke != null)
@@ -967,8 +965,11 @@ namespace ShapeGame
                 head.StrokeThickness = strokeThickness;
                 head.Fill = brush;
                 // locate the object
-                head.SetValue(Canvas.LeftProperty, center.X - size);
-                head.SetValue(Canvas.TopProperty, center.Y - size);
+                double vx = this.XVelocity;
+                double vy = this.YVelocity;
+                double resultan = Math.Sqrt(vx * vx + vy * vy);
+                head.SetValue(Canvas.LeftProperty, center.X + size * vx / resultan - size / 2);
+                head.SetValue(Canvas.TopProperty, center.Y + size * vy / resultan - size / 2);
 
                 children.Add(head);
             }
