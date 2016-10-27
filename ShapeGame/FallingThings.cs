@@ -182,58 +182,90 @@ namespace ShapeGame
                     {
                         case ThingState.Bouncing:
                         case ThingState.Falling:
+                            var hitCenter = new System.Windows.Point(0, 0);
+                            double lineHitLocation = 0;
+                            Segment seg = pair.Value.GetEstimatedSegment(cur);
+                            if (thing.Hit(seg, ref hitCenter, ref lineHitLocation))
                             {
-                                var hitCenter = new System.Windows.Point(0, 0);
-                                double lineHitLocation = 0;
-                                Segment seg = pair.Value.GetEstimatedSegment(cur);
-                                if (thing.Hit(seg, ref hitCenter, ref lineHitLocation))
+                                double fMs = 1000;
+                                if (thing.TimeLastHit != DateTime.MinValue)
                                 {
-                                    double fMs = 1000;
-                                    if (thing.TimeLastHit != DateTime.MinValue)
+                                    fMs = cur.Subtract(thing.TimeLastHit).TotalMilliseconds;
+                                    thing.AvgTimeBetweenHits = (thing.AvgTimeBetweenHits * 0.8) + (0.2 * fMs);
+                                }
+
+                                thing.TimeLastHit = cur;
+
+                                // Bounce off head and hands
+                                if (seg.IsCircle())
+                                {
+                                    // Bounce off of hand/head/foot
+                                    thing.BounceOff(
+                                        hitCenter.X,
+                                        hitCenter.Y,
+                                        seg.Radius,
+                                        pair.Value.XVelocity / this.targetFrameRate,
+                                        pair.Value.YVelocity / this.targetFrameRate);
+
+                                    if (fMs > 100.0)
                                     {
-                                        fMs = cur.Subtract(thing.TimeLastHit).TotalMilliseconds;
-                                        thing.AvgTimeBetweenHits = (thing.AvgTimeBetweenHits * 0.8) + (0.2 * fMs);
+                                        hit |= HitType.Hand;
                                     }
+                                }
+                                else
+                                {
+                                    if (thing.State != ThingState.Attached)
+                                    {
+                                        thing.State = ThingState.Attached;
+                                        thing.attachedTo = pair.Value;
+                                        thing.attachedAt = lineHitLocation;
+                                    }
+                                    // Bounce off line segment
+                                    // double velocityX = (pair.Value.XVelocity * (1.0 - lineHitLocation)) + (pair.Value.XVelocity2 * lineHitLocation);
+                                    // double velocityY = (pair.Value.YVelocity * (1.0 - lineHitLocation)) + (pair.Value.YVelocity2 * lineHitLocation);
 
-                                    thing.TimeLastHit = cur;
+                                    // thing.BounceOff(
+                                    //     hitCenter.X,
+                                    //     hitCenter.Y,
+                                    //     seg.Radius,
+                                    //     velocityX / this.targetFrameRate,
+                                    //     velocityY / this.targetFrameRate);
 
-                                    // Bounce off head and hands
+                                    // if (fMs > 100.0)
+                                    // {
+                                    //     hit |= HitType.Arm;
+                                    // }
+                                }
+
+                                if (this.gameMode == GameMode.TwoPlayer)
+                                {
+                                    if (thing.State == ThingState.Falling)
+                                    {
+                                        thing.State = ThingState.Bouncing;
+                                        thing.TouchedBy = playerId;
+                                        thing.Hotness = 1;
+                                        thing.FlashCount = 0;
+                                    }
+                                    else if (thing.State == ThingState.Bouncing)
+                                    {
+                                        if (thing.TouchedBy != playerId)
+                                        {
+                                            if (seg.IsCircle())
+                                            {
+                                                thing.TouchedBy = playerId;
+                                                thing.Hotness = Math.Min(thing.Hotness + 1, 4);
+                                            }
+                                            else
+                                            {
+                                                hit |= HitType.Popped;
+                                                this.AddToScore(thing.TouchedBy, 5 << (thing.Hotness - 1), thing.Center);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (this.gameMode == GameMode.Solo)
+                                {
                                     if (seg.IsCircle())
-                                    {
-                                        // Bounce off of hand/head/foot
-                                        thing.BounceOff(
-                                            hitCenter.X,
-                                            hitCenter.Y,
-                                            seg.Radius,
-                                            pair.Value.XVelocity / this.targetFrameRate,
-                                            pair.Value.YVelocity / this.targetFrameRate);
-
-                                        if (fMs > 100.0)
-                                        {
-                                            hit |= HitType.Hand;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Bounce off line segment
-                                        Console.WriteLine("Menyentuh Line");
-                                        double velocityX = (pair.Value.XVelocity * (1.0 - lineHitLocation)) + (pair.Value.XVelocity2 * lineHitLocation);
-                                        double velocityY = (pair.Value.YVelocity * (1.0 - lineHitLocation)) + (pair.Value.YVelocity2 * lineHitLocation);
-
-                                        thing.BounceOff(
-                                            hitCenter.X,
-                                            hitCenter.Y,
-                                            seg.Radius,
-                                            velocityX / this.targetFrameRate,
-                                            velocityY / this.targetFrameRate);
-
-                                        if (fMs > 100.0)
-                                        {
-                                            hit |= HitType.Arm;
-                                        }
-                                    }
-
-                                    if (this.gameMode == GameMode.TwoPlayer)
                                     {
                                         if (thing.State == ThingState.Falling)
                                         {
@@ -242,63 +274,33 @@ namespace ShapeGame
                                             thing.Hotness = 1;
                                             thing.FlashCount = 0;
                                         }
-                                        else if (thing.State == ThingState.Bouncing)
+                                        else if ((thing.State == ThingState.Bouncing) && (fMs > 100.0))
                                         {
-                                            if (thing.TouchedBy != playerId)
-                                            {
-                                                if (seg.IsCircle())
-                                                {
-                                                    thing.TouchedBy = playerId;
-                                                    thing.Hotness = Math.Min(thing.Hotness + 1, 4);
-                                                }
-                                                else
-                                                {
-                                                    hit |= HitType.Popped;
-                                                    this.AddToScore(thing.TouchedBy, 5 << (thing.Hotness - 1), thing.Center);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else if (this.gameMode == GameMode.Solo)
-                                    {
-                                        if (seg.IsCircle())
-                                        {
-                                            if (thing.State == ThingState.Falling)
-                                            {
-                                                thing.State = ThingState.Bouncing;
-                                                thing.TouchedBy = playerId;
-                                                thing.Hotness = 1;
-                                                thing.FlashCount = 0;
-                                            }
-                                            else if ((thing.State == ThingState.Bouncing) && (fMs > 100.0))
-                                            {
-                                                hit |= HitType.Popped;
-                                                int points = (pair.Key.Joint1 == JointType.FootLeft
-                                                              || pair.Key.Joint1 == JointType.FootRight)
-                                                                 ? 10
-                                                                 : 5;
-                                                this.AddToScore(
-                                                    thing.TouchedBy,
-                                                    points,
-                                                    thing.Center);
-                                                thing.TouchedBy = playerId;
-                                            }
-                                        }
-                                    }
-
-                                    this.things[i] = thing;
-
-                                    if (thing.AvgTimeBetweenHits < 8)
-                                    {
-                                        hit |= HitType.Popped | HitType.Squeezed;
-                                        if (this.gameMode != GameMode.Off)
-                                        {
-                                            this.AddToScore(playerId, 1, thing.Center);
+                                            hit |= HitType.Popped;
+                                            int points = (pair.Key.Joint1 == JointType.FootLeft
+                                                          || pair.Key.Joint1 == JointType.FootRight)
+                                                             ? 10
+                                                             : 5;
+                                            this.AddToScore(
+                                                thing.TouchedBy,
+                                                points,
+                                                thing.Center);
+                                            thing.TouchedBy = playerId;
                                         }
                                     }
                                 }
-                            }
 
+                                this.things[i] = thing;
+
+                                if (thing.AvgTimeBetweenHits < 8)
+                                {
+                                    hit |= HitType.Popped | HitType.Squeezed;
+                                    if (this.gameMode != GameMode.Off)
+                                    {
+                                        this.AddToScore(playerId, 1, thing.Center);
+                                    }
+                                }
+                            }
                             break;
                     }
 
@@ -330,31 +332,41 @@ namespace ShapeGame
                 thing.XVelocity *= this.airFriction;
                 thing.Theta += thing.SpinRate;
 
-                // bounce off walls
-                if ((thing.Center.X - thing.Size < 0) || (thing.Center.X + thing.Size > this.sceneRect.Width))
+                if (thing.State == ThingState.Attached)
                 {
-                    thing.XVelocity = -thing.XVelocity;
-                    thing.Center.X += thing.XVelocity;
+                    Segment seg = thing.attachedTo.Segment;
+                    thing.Center.X = seg.X1 + (seg.X2 - seg.X1) * thing.attachedAt;
+                    thing.Center.Y = seg.Y1 + (seg.Y2 - seg.Y1) * thing.attachedAt;
                 }
-
-                // Then get rid of one if any that fall off the bottom
-                if (thing.Center.Y - thing.Size > this.sceneRect.Bottom)
+                else
                 {
-                    thing.State = ThingState.Remove;
-                }
+                    // bounce off walls
+                    if ((thing.Center.X - thing.Size < 0) || (thing.Center.X + thing.Size > this.sceneRect.Width))
+                    {
+                        thing.XVelocity = -thing.XVelocity;
+                        thing.Center.X += thing.XVelocity;
+                    }
 
-                // Get rid of after dissolving.
-                if (thing.State == ThingState.Dissolving)
-                {
-                    thing.Dissolve += 1 / (this.targetFrameRate * DissolveTime);
-                    thing.Size *= this.expandingRate;
-                    if (thing.Dissolve >= 1.0)
+                    // Then get rid of one if any that fall off the bottom
+                    if (thing.Center.Y - thing.Size > this.sceneRect.Bottom)
                     {
                         thing.State = ThingState.Remove;
                     }
+
+                    // Get rid of after dissolving.
+                    if (thing.State == ThingState.Dissolving)
+                    {
+                        thing.Dissolve += 1 / (this.targetFrameRate * DissolveTime);
+                        thing.Size *= this.expandingRate;
+                        if (thing.Dissolve >= 1.0)
+                        {
+                            thing.State = ThingState.Remove;
+                        }
+                    }
+                    
                 }
 
-                this.things[thingIndex] = thing;
+                // this.things[thingIndex] = thing;
             }
 
             // Then remove any that should go away now
@@ -670,14 +682,6 @@ namespace ShapeGame
                 polyline.StrokeThickness = strokeThickness;
                 return polyline;
             }
-        }
-
-        public enum ThingState
-        {
-            Falling = 0,
-            Bouncing = 1,
-            Dissolving = 2,
-            Remove = 3
         }
         
     }

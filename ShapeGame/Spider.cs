@@ -23,12 +23,14 @@ namespace ShapeGame
         public System.Windows.Media.Brush Brush2;
         public System.Windows.Media.Brush BrushPulse;
         public double Dissolve;
-        public FallingThings.ThingState State;
+        public ThingState State;
         public DateTime TimeLastHit;
         public double AvgTimeBetweenHits;
         public int TouchedBy;               // Last player to touch this thing
         public int Hotness;                 // Score level
         public int FlashCount;
+        public BoneData attachedTo;
+        public double attachedAt;
 
         // Hit testing between this thing and a single segment.  If hit, the center point on
         // the segment being hit is returned, along with the spot on the line from 0 to 1 if
@@ -113,7 +115,11 @@ namespace ShapeGame
             return false;
         }
 
-        // Change our velocity based on the object's velocity, our velocity, and where we hit.
+        /* Change our velocity based on the object's velocity, our velocity, and where we hit.
+         *   x1, y1: titik temu benda dengan segment
+         *   otherSize: segment radius
+         *   fXv, fYv: segment velocity
+         */
         public void BounceOff(double x1, double y1, double otherSize, double fXv, double fYv)
         {
             double x0 = this.Center.X;
@@ -172,7 +178,7 @@ namespace ShapeGame
             }
 
             // Disolving gradually
-            if (this.State == FallingThings.ThingState.Dissolving)
+            if (this.State == ThingState.Dissolving)
             {
                 this.Brush.Opacity = 1.0 - (this.Dissolve * this.Dissolve);
             }
@@ -181,7 +187,7 @@ namespace ShapeGame
             double spin = this.Theta;
             System.Windows.Point center = this.Center;
             Brush brush = this.Brush;
-            Brush brushStroke = (this.State == FallingThings.ThingState.Dissolving) ? null : this.Brush2;
+            Brush brushStroke = (this.State == ThingState.Dissolving) ? null : this.Brush2;
             double strokeThickness = 1;
             double opacity = 1;
 

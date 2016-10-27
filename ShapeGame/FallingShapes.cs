@@ -48,6 +48,15 @@ namespace ShapeGame.Utils
         TwoPlayer = 2
     }
 
+    public enum ThingState
+    {
+        Falling = 0,
+        Bouncing = 1,
+        Dissolving = 2,
+        Attached = 3,
+        Remove = 4,
+    }
+
     // For hit testing, a dictionary of BoneData items, keyed off the endpoints
     // of a segment (Bone) is used.  The velocity of these endpoints is estimated
     // and used during hit testing and updating velocity vectors after a hit.
