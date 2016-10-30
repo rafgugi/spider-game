@@ -43,7 +43,7 @@ namespace ShapeGame
         #region Private State
         private const int TimerResolution = 2;  // ms
         private const int NumIntraFrames = 3;
-        private const int MaxShapes = 80;
+        private const int MaxShapes = 3;
         private const double MaxFramerate = 70;
         private const double MinFramerate = 15;
         private const double MinShapeSize = 12;
@@ -448,7 +448,7 @@ namespace ShapeGame
             {
                 foreach (var pair in this.players)
                 {
-                    HitType hit = this.myFallingThings.LookForHits(pair.Value.Segments, pair.Value.GetId());
+                    HitType hit = this.myFallingThings.LookForHits(pair.Value.Segments, pair.Value.GetId(), pair.Value);
                     if ((hit & HitType.Squeezed) != 0)
                     {
                         this.squeezeSound.Play();

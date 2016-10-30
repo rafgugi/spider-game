@@ -100,6 +100,11 @@ namespace ShapeGame.Utils
         {
             return (this.X1 == this.X2) && (this.Y1 == this.Y2);
         }
+
+        public override string ToString()
+        {
+            return "X1:" + X1 + " Y1:" + Y1;
+        }
     }
 
     public struct BoneData
@@ -116,6 +121,7 @@ namespace ShapeGame.Utils
 
         public BoneData(Segment s)
         {
+            Console.WriteLine("new bone data");
             this.Segment = this.LastSegment = s;
             this.XVelocity = this.YVelocity = 0;
             this.XVelocity2 = this.YVelocity2 = 0;

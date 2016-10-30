@@ -161,7 +161,7 @@ namespace ShapeGame
             this.polyTypes = polies;
         }
 
-        public HitType LookForHits(Dictionary<Bone, BoneData> segments, int playerId)
+        public HitType LookForHits(Dictionary<Bone, BoneData> segments, int playerId, Player player)
         {
             DateTime cur = DateTime.Now;
             HitType allHits = HitType.None;
@@ -182,6 +182,7 @@ namespace ShapeGame
                     {
                         case ThingState.Bouncing:
                         case ThingState.Falling:
+                        case ThingState.Attached:
                             var hitCenter = new System.Windows.Point(0, 0);
                             double lineHitLocation = 0;
                             Segment seg = pair.Value.GetEstimatedSegment(cur);
@@ -211,30 +212,22 @@ namespace ShapeGame
                                     {
                                         hit |= HitType.Hand;
                                     }
+                                    thing.State = ThingState.Bouncing;
                                 }
                                 else
                                 {
                                     if (thing.State != ThingState.Attached)
                                     {
                                         thing.State = ThingState.Attached;
-                                        thing.attachedTo = pair.Value;
+                                        thing.attachedPlayer = player;
+                                        thing.attachedTo = pair.Key;
                                         thing.attachedAt = lineHitLocation;
                                     }
-                                    // Bounce off line segment
-                                    // double velocityX = (pair.Value.XVelocity * (1.0 - lineHitLocation)) + (pair.Value.XVelocity2 * lineHitLocation);
-                                    // double velocityY = (pair.Value.YVelocity * (1.0 - lineHitLocation)) + (pair.Value.YVelocity2 * lineHitLocation);
+                                }
 
-                                    // thing.BounceOff(
-                                    //     hitCenter.X,
-                                    //     hitCenter.Y,
-                                    //     seg.Radius,
-                                    //     velocityX / this.targetFrameRate,
-                                    //     velocityY / this.targetFrameRate);
-
-                                    // if (fMs > 100.0)
-                                    // {
-                                    //     hit |= HitType.Arm;
-                                    // }
+                                if (thing.State == ThingState.Attached)
+                                {
+                                    break;
                                 }
 
                                 if (this.gameMode == GameMode.TwoPlayer)
@@ -334,7 +327,9 @@ namespace ShapeGame
 
                 if (thing.State == ThingState.Attached)
                 {
-                    Segment seg = thing.attachedTo.Segment;
+                    Player attch = thing.attachedPlayer;
+                    Segment seg = attch.Segments[thing.attachedTo].Segment;
+
                     thing.Center.X = seg.X1 + (seg.X2 - seg.X1) * thing.attachedAt;
                     thing.Center.Y = seg.Y1 + (seg.Y2 - seg.Y1) * thing.attachedAt;
                 }
@@ -363,10 +358,10 @@ namespace ShapeGame
                             thing.State = ThingState.Remove;
                         }
                     }
-                    
+
                 }
 
-                // this.things[thingIndex] = thing;
+                this.things[thingIndex] = thing;
             }
 
             // Then remove any that should go away now
@@ -439,7 +434,7 @@ namespace ShapeGame
                             (0.02 + (i * 0.6)) * this.sceneRect.Width,
                             0.01 * this.sceneRect.Height,
                             0.4 * this.sceneRect.Width,
-                            0.3 * this.sceneRect.Height), 
+                            0.3 * this.sceneRect.Height),
                             new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 255, 255, 255)));
                     label.FontSize = Math.Max(1, Math.Min(this.sceneRect.Width / 12, this.sceneRect.Height / 12));
                     children.Add(label);
@@ -683,6 +678,6 @@ namespace ShapeGame
                 return polyline;
             }
         }
-        
+
     }
 }

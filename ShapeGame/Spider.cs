@@ -29,7 +29,8 @@ namespace ShapeGame
         public int TouchedBy;               // Last player to touch this thing
         public int Hotness;                 // Score level
         public int FlashCount;
-        public BoneData attachedTo;
+        public Player attachedPlayer;
+        public Bone attachedTo;
         public double attachedAt;
 
         // Hit testing between this thing and a single segment.  If hit, the center point on
