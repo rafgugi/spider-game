@@ -106,7 +106,7 @@ namespace ShapeGame
 
             // Draw all bones first, then circles (head and hands).
             DateTime cur = DateTime.Now;
-            /*
+            
             foreach (var segment in this.segments)
             {
                 Segment seg = segment.Value.GetEstimatedSegment(cur);
@@ -140,7 +140,7 @@ namespace ShapeGame
                     circle.Fill = this.bonesBrush;
                     children.Add(circle);
                 }
-            }*/
+            }
 
             // Remove unused players after 1/2 second.
             if (DateTime.Now.Subtract(this.LastUpdated).TotalMilliseconds > 500)
