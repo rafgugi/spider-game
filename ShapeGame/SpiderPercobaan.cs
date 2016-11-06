@@ -163,7 +163,7 @@ namespace ShapeGame
             this.Center.Y = y0;
         }
 
-        private Path makelegandhand(Point[] Direction, Brush brush)
+        public Path makelegandhand(Point[] Direction, Brush brush)
         {
             Path temp = new Path();
             temp.Stroke = brush;
@@ -189,7 +189,7 @@ namespace ShapeGame
             return temp;
         }
 
-        private Shape makeheadandeye(double[] Direction, Brush brush, Brush brushStroke, double size)
+        public Shape makeheadandeye(double[] Direction, Brush brush, Brush brushStroke, double size)
         {
             double strokeThickness = 1;
             double opacity = 1;
