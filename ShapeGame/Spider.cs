@@ -1,5 +1,6 @@
 ﻿using ShapeGame.Utils;
 using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -162,6 +163,53 @@ namespace ShapeGame
             this.Center.Y = y0;
         }
 
+        public Path makelegandhand(Point[] Direction, Brush brush)
+        {
+            Path temp = new Path();
+            temp.Stroke = brush;
+            temp.StrokeThickness = 2;
+
+            PathFigure myPathFigure = new PathFigure();
+            myPathFigure.StartPoint = Direction[0];
+
+            BezierSegment Bezier = new BezierSegment();
+            Bezier.Point1 = Direction[1];
+            Bezier.Point2 = Direction[2];
+            Bezier.Point3 = Direction[3];
+
+            PathSegmentCollection mySegCollect = new PathSegmentCollection();
+            mySegCollect.Add(Bezier);
+            myPathFigure.Segments = mySegCollect;
+            PathFigureCollection myPathFigCollection = new PathFigureCollection();
+            myPathFigCollection.Add(myPathFigure);
+            PathGeometry myPathGeometry = new PathGeometry();
+            myPathGeometry.Figures = myPathFigCollection;
+            temp.Data = myPathGeometry;
+
+            return temp;
+        }
+
+        public Shape makeheadandeye(double[] Direction, Brush brush, Brush brushStroke, double size)
+        {
+            double strokeThickness = 1;
+            double opacity = 1;
+
+            Shape temp = new Ellipse { Width = size, Height = size, Stroke = brushStroke };
+
+            if (temp.Stroke != null)
+            {
+                temp.Stroke.Opacity = opacity;
+            }
+
+            temp.StrokeThickness = strokeThickness;
+            temp.Fill = brush;
+
+            temp.SetValue(Canvas.LeftProperty, Direction[0]);
+            temp.SetValue(Canvas.TopProperty, Direction[1]);
+
+            return temp;
+        }
+
         public void Draw(UIElementCollection children)
         {
             // init bruh if not yet defined
@@ -184,47 +232,117 @@ namespace ShapeGame
                 this.Brush.Opacity = 1.0 - (this.Dissolve * this.Dissolve);
             }
 
-            double size = this.Size;
+            double size = this.Size * 2;
             double spin = this.Theta;
             System.Windows.Point center = this.Center;
-            Brush brush = this.Brush;
-            Brush brushStroke = (this.State == ThingState.Dissolving) ? null : this.Brush2;
-            double strokeThickness = 1;
-            double opacity = 1;
-
-            Shape circle = new Ellipse { Width = size * 2, Height = size * 2, Stroke = brushStroke };
-
-            if (circle.Stroke != null)
-            {
-                circle.Stroke.Opacity = opacity;
-            }
-
-            circle.StrokeThickness = strokeThickness;
-            circle.Fill = brush;
-            // locate the object
-            circle.SetValue(Canvas.LeftProperty, center.X - size);
-            circle.SetValue(Canvas.TopProperty, center.Y - size);
-
-            children.Add(circle);
-
-            // create spiders head
-            Shape head = new Ellipse { Width = size, Height = size, Stroke = brushStroke };
-
-            if (head.Stroke != null)
-            {
-                head.Stroke.Opacity = opacity;
-            }
-
-            head.StrokeThickness = strokeThickness;
-            head.Fill = brush;
-            // locate the object
             double vx = this.XVelocity;
             double vy = this.YVelocity;
             double resultan = Math.Sqrt(vx * vx + vy * vy);
-            head.SetValue(Canvas.LeftProperty, center.X + size * vx / resultan - size / 2);
-            head.SetValue(Canvas.TopProperty, center.Y + size * vy / resultan - size / 2);
 
+            Brush brush = this.Brush;
+            Brush brush_white = new SolidColorBrush(System.Windows.Media.Color.FromRgb(248,248,255));
+            Brush brushStroke = (this.State == ThingState.Dissolving) ? null : this.Brush2;
+
+            // create spiders head
+            double[] direction = { center.X + size * vx / resultan - size / 2, center.Y + size * vy / resultan - size / 2};
+            Shape head = makeheadandeye(direction, brush, brushStroke, size);
             children.Add(head);
+
+            //create left cornea
+            direction = new double[] { center.X + size * vx / resultan - size * 0.32, center.Y + size * vy / resultan - size * 0.2 };
+            Shape l_eye = makeheadandeye(direction, brush_white, brush_white, size*0.35);
+            children.Add(l_eye);
+
+            //create right cornea
+            direction = new double[] { center.X + size * vx / resultan, center.Y + size * vy / resultan - size * 0.2 };
+            Shape r_eye = makeheadandeye(direction, brush_white, brush_white, size * 0.35);
+            children.Add(r_eye);
+
+            //create left eyeball
+            direction = new double[] { center.X + size * vx / resultan - size * 0.25, center.Y + size * vy / resultan - size * 0.15 };
+            Shape l_eyeball = makeheadandeye(direction, brush, brushStroke, size*0.13);
+            children.Add(l_eyeball);
+
+            //create right eyeball
+            direction = new double[] { center.X + size * vx / resultan + size * 0.10, center.Y + size * vy / resultan - size * 0.15 };
+            Shape r_eyeball = makeheadandeye(direction, brush, brushStroke, size * 0.13);
+            children.Add(r_eyeball);
+
+            //create left hand
+            Point[] lh = new Point[4];
+            lh[0] = new Point(center.X + size * vx / resultan - size * 0.4, center.Y + size * vy / resultan + size * 0.3);
+            lh[1] = new Point(center.X + size * vx / resultan - size * 0.6, center.Y + size * vy / resultan + size * 0.6);
+            lh[2] = new Point(center.X + size * vx / resultan - size * 0.6, center.Y + size * vy / resultan + size * 0.61);
+            lh[3] = new Point(center.X + size * vx / resultan, center.Y + size * vy / resultan + size * 0.7);
+            Path l_hand = makelegandhand(lh, brush);
+            children.Add(l_hand);
+
+            //create right hand
+            Point[] rh = new Point[4];
+            rh[0] = new Point(center.X + size * vx / resultan + size * 0.4, center.Y + size * vy / resultan + size * 0.3);
+            rh[1] = new Point(center.X + size * vx / resultan + size * 0.6, center.Y + size * vy / resultan + size * 0.6);
+            rh[2] = new Point(center.X + size * vx / resultan + size * 0.6, center.Y + size * vy / resultan + size * 0.61);
+            rh[3] = new Point(center.X + size * vx / resultan - size * 0.1, center.Y + size * vy / resultan + size * 0.8);
+            Path r_hand = makelegandhand(rh, brush);
+            children.Add(r_hand);
+
+            //create left lower limb
+            Point[] ll = new Point[4];
+            ll[0] = new Point(center.X + size * vx / resultan - size * 0.45, center.Y + size * vy / resultan);
+            ll[1] = new Point(center.X + size * vx / resultan - size * 0.9, center.Y + size * vy / resultan - size * 0.1);
+            ll[2] = new Point(center.X + size * vx / resultan - size * 0.87, center.Y + size * vy / resultan - size * 0.08);
+            ll[3] = new Point(center.X + size * vx / resultan - size * 0.7, center.Y + size * vy / resultan + size * 0.7);
+            Path first_leftleg = makelegandhand(ll, brush);
+            children.Add(first_leftleg);
+            Point[] lf = new Point[4];
+            lf[0] = new Point(center.X + size * vx / resultan - size * 0.7, center.Y + size * vy / resultan + size * 0.7);
+            lf[1] = new Point(center.X + size * vx / resultan - size * 0.7, center.Y + size * vy / resultan + size * 0.8);
+            lf[2] = new Point(center.X + size * vx / resultan - size * 0.83, center.Y + size * vy / resultan + size * 0.81);
+            lf[3] = new Point(center.X + size * vx / resultan - size * 0.9, center.Y + size * vy / resultan + size * 0.8);
+            Path first_leftfoot = makelegandhand(lf, brush);
+            children.Add(first_leftfoot);
+
+            ll[0] = new Point(center.X + size * vx / resultan - size * 0.4, center.Y + size * vy / resultan - size * 0.3);
+            ll[1] = new Point(center.X + size * vx / resultan - size * 0.85, center.Y + size * vy / resultan - size * 0.4);
+            ll[2] = new Point(center.X + size * vx / resultan - size * 0.82, center.Y + size * vy / resultan - size * 0.38);
+            ll[3] = new Point(center.X + size * vx / resultan - size * 0.65, center.Y + size * vy / resultan + size * 0.4);
+            Path second_leftleg = makelegandhand(ll, brush);
+            children.Add(second_leftleg);
+            lf[0] = new Point(center.X + size * vx / resultan - size * 0.65, center.Y + size * vy / resultan + size * 0.4);
+            lf[1] = new Point(center.X + size * vx / resultan - size * 0.65, center.Y + size * vy / resultan + size * 0.5);
+            lf[2] = new Point(center.X + size * vx / resultan - size * 0.78, center.Y + size * vy / resultan + size * 0.51);
+            lf[3] = new Point(center.X + size * vx / resultan - size * 0.9, center.Y + size * vy / resultan + size * 0.5);
+            Path second_leftfoot = makelegandhand(lf, brush);
+            children.Add(second_leftfoot);
+
+            //create right lower limb
+            Point[] rl = new Point[4];
+            rl[0] = new Point(center.X + size * vx / resultan + size * 0.45, center.Y + size * vy / resultan);
+            rl[1] = new Point(center.X + size * vx / resultan + size * 0.9, center.Y + size * vy / resultan - size * 0.1);
+            rl[2] = new Point(center.X + size * vx / resultan + size * 0.87, center.Y + size * vy / resultan - size * 0.08);
+            rl[3] = new Point(center.X + size * vx / resultan + size * 0.7, center.Y + size * vy / resultan + size * 0.7);
+            Path first_rightleg = makelegandhand(rl, brush);
+            children.Add(first_rightleg);
+            Point[] rf = new Point[4];
+            rf[0] = new Point(center.X + size * vx / resultan + size * 0.7, center.Y + size * vy / resultan + size * 0.7);
+            rf[1] = new Point(center.X + size * vx / resultan + size * 0.7, center.Y + size * vy / resultan + size * 0.8);
+            rf[2] = new Point(center.X + size * vx / resultan + size * 0.83, center.Y + size * vy / resultan + size * 0.81);
+            rf[3] = new Point(center.X + size * vx / resultan + size * 0.9, center.Y + size * vy / resultan + size * 0.8);
+            Path first_rightfoot = makelegandhand(rf, brush);
+            children.Add(first_rightfoot);
+
+            rl[0] = new Point(center.X + size * vx / resultan + size * 0.4, center.Y + size * vy / resultan - size * 0.3);
+            rl[1] = new Point(center.X + size * vx / resultan + size * 0.85, center.Y + size * vy / resultan - size * 0.4);
+            rl[2] = new Point(center.X + size * vx / resultan + size * 0.82, center.Y + size * vy / resultan - size * 0.38);
+            rl[3] = new Point(center.X + size * vx / resultan + size * 0.65, center.Y + size * vy / resultan + size * 0.4);
+            Path second_rightleg = makelegandhand(rl, brush);
+            children.Add(second_rightleg);
+            rf[0] = new Point(center.X + size * vx / resultan + size * 0.65, center.Y + size * vy / resultan + size * 0.4);
+            rf[1] = new Point(center.X + size * vx / resultan + size * 0.65, center.Y + size * vy / resultan + size * 0.5);
+            rf[2] = new Point(center.X + size * vx / resultan + size * 0.78, center.Y + size * vy / resultan + size * 0.51);
+            rf[3] = new Point(center.X + size * vx / resultan + size * 0.9, center.Y + size * vy / resultan + size * 0.5);
+            Path second_rightfoot = makelegandhand(rf, brush);
+            children.Add(second_rightfoot);    
         }
 
     }
