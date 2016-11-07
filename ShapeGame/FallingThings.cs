@@ -36,8 +36,8 @@ namespace ShapeGame
         private Rect sceneRect;
         private double targetFrameRate = 60;
         private double dropRate = 2.0;
-        private double shapeSize = 1.0;
-        private double baseShapeSize = 20;
+        private double shapeSize = 0.3;
+        private double baseShapeSize = 1;
         private GameMode gameMode = GameMode.Off;
         private double gravity = BaseGravity;
         private double gravityFactor = 1.0;
@@ -387,18 +387,9 @@ namespace ShapeGame
                 byte g;
                 byte b;
 
-                if (this.doRandomColors)
-                {
-                    r = (byte)(this.rnd.Next(215) + 40);
-                    g = (byte)(this.rnd.Next(215) + 40);
-                    b = (byte)(this.rnd.Next(215) + 40);
-                }
-                else
-                {
-                    r = (byte)Math.Min(255.0, this.baseColor.R * (0.7 + (this.rnd.NextDouble() * 0.7)));
-                    g = (byte)Math.Min(255.0, this.baseColor.G * (0.7 + (this.rnd.NextDouble() * 0.7)));
-                    b = (byte)Math.Min(255.0, this.baseColor.B * (0.7 + (this.rnd.NextDouble() * 0.7)));
-                }
+                r = (byte)(this.rnd.Next(40) + 40);
+                g = (byte)(this.rnd.Next(40) + 40);
+                b = (byte)(this.rnd.Next(40) + 40);
 
                 PolyType tryType;
                 do

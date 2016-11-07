@@ -99,6 +99,7 @@ namespace ShapeGame
 
         public void Draw(UIElementCollection children)
         {
+            //return;
             if (!this.IsAlive)
             {
                 return;
