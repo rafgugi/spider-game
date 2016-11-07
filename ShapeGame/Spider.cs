@@ -235,9 +235,9 @@ namespace ShapeGame
             double size = this.Size * 2;
             double spin = this.Theta;
             System.Windows.Point center = this.Center;
-            double vx = this.XVelocity;
-            double vy = this.YVelocity;
-            double resultan = Math.Sqrt(vx * vx + vy * vy);
+            double vx = 0;
+            double vy = 0;
+            double resultan = 1;
 
             Brush brush = this.Brush;
             Brush brush_white = new SolidColorBrush(System.Windows.Media.Color.FromRgb(248,248,255));

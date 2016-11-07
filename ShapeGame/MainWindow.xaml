@@ -8,9 +8,10 @@
     <Grid>
         <StackPanel Orientation="Vertical">
             <Grid>
+                <Canvas Margin="4,20,-4,20" Height="688" Width="619" SizeChanged="PlayfieldSizeChanged" Background="Black">
+                </Canvas>
                 <kt:KinectColorViewer Margin="0,40,0,0" HorizontalAlignment="Center" Width="619" Height="688" VerticalAlignment="Top" KinectSensorManager="{Binding}"/>
-                <Canvas Margin="0" x:Name="playfield" Height="688" Width="619" SizeChanged="PlayfieldSizeChanged">
-                    
+                <Canvas Margin="4,20,-4,20" x:Name="playfield" Height="688" Width="619" SizeChanged="PlayfieldSizeChanged">
                 </Canvas>
                 <toolkit:KinectSensorChooserUI x:Name="SensorChooserUI" IsListening="True"  HorizontalAlignment="Center" VerticalAlignment="Top" />
             </Grid>

@@ -426,6 +426,7 @@ namespace ShapeGame
             if (this.scores.Count != 0)
             {
                 int i = 0;
+                Console.WriteLine(this.scores.Count);
                 foreach (var score in this.scores)
                 {
                     Label label = MakeSimpleLabel(
@@ -438,6 +439,7 @@ namespace ShapeGame
                             new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 255, 255, 255)));
                     label.FontSize = Math.Max(1, Math.Min(this.sceneRect.Width / 12, this.sceneRect.Height / 12));
                     children.Add(label);
+                    break;
                     i++;
                 }
             }
