@@ -161,6 +161,14 @@ namespace ShapeGame
             this.polyTypes = polies;
         }
 
+        /**
+         * Untuk setiap spider, lakukan pengecekan terhadap semua player
+         * apakah spider mengenai salah satu bagian dari player. Jika
+         * mengenai bagian kepala, ujung tangan, atau ujung kaki, maka
+         * hancurkan spider dan menambah score sesuai peraturan. Jika
+         * mengenai bagian tubuh lain, tempelkan spider ke bagian tubuh
+         * tersebut.
+         */
         public HitType LookForHits(Dictionary<Bone, BoneData> segments, int playerId, Player player)
         {
             DateTime cur = DateTime.Now;

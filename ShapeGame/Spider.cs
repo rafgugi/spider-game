@@ -34,9 +34,11 @@ namespace ShapeGame
         public Bone attachedTo;
         public double attachedAt;
 
-        // Hit testing between this thing and a single segment.  If hit, the center point on
-        // the segment being hit is returned, along with the spot on the line from 0 to 1 if
-        // a line segment was hit.
+        /**
+         * Pengecekan apakah spider menabrak segment tubuh. Jika iya, maka
+         * hitCenter akan menyimpan titik koordinat segment mengenai spider, dan
+         * lineHitLocation akan menyimpan posisi di segment dengan skala 0-1.
+         */
         public bool Hit(Segment seg, ref System.Windows.Point hitCenter, ref double lineHitLocation)
         {
             double minDxSquared = this.Size + seg.Radius;

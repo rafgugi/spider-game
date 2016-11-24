@@ -339,15 +339,6 @@ namespace ShapeGame
                     this.myFallingThings.SetGameMode(GameMode.Off);
                 }
 
-                if (this.playersAlive == 0)
-                {
-                    BannerText.NewBanner(
-                        Properties.Resources.Vocabulary,
-                        this.screenRect,
-                        true,
-                        System.Windows.Media.Color.FromArgb(200, 255, 255, 255));
-                }
-
                 this.playersAlive = alive;
             }
         }
@@ -435,6 +426,10 @@ namespace ShapeGame
             }
         }
 
+        /**
+         * Menggerakkan semua spider, melakukan pengecekan semua player
+         * terhadap semua spider, dan menggambar semua elemen ke canvas.
+         */
         private void HandleGameTimer(int param)
         {
             // Every so often, notify what our actual framerate is
